@@ -1,2 +1,2 @@
 [workspace]
-members = ["pubsub"]
+members = ["pubsub", "multi_thread_pubsub"]

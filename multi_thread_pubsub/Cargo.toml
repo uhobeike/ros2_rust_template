@@ -1,0 +1,2 @@
+[workspace]
+members = ["multi_thread_pub", "multi_thread_sub"]
