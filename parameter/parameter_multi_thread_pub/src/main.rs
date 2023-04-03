@@ -54,7 +54,7 @@ async fn main() -> Result<(), DynError> {
     }
   });
 
-  let param_server = node.create_parameter_server()?;
+  let mut param_server = node.create_parameter_server()?;
   {
     let mut params = param_server.params.write();
 
@@ -74,32 +74,29 @@ async fn main() -> Result<(), DynError> {
   }
 
   let logger = Logger::new("parameter_multi_thread_pub");
-  let mut selector = ctx.create_selector()?;
   let param_server_publish_string = Arc::clone(&publish_string);
   let param_server_publish_hz = Arc::clone(&publish_hz);
-  selector.add_parameter_server(param_server,
-    Box::new(move |params, updated| {
-      let mut string = param_server_publish_string.lock().unwrap();
-      let mut hz = param_server_publish_hz.lock().unwrap();
-      for key in updated.iter() {
-        let value = &params.get_parameter(key).unwrap().value;
-        match &key[..] {
-            "publish_hz" => {
-              *hz = format!("{}", value).parse::<f64>().unwrap();
-              pr_info!(logger, "updated parameters[ name:{key} value:{hz}[Hz] ]");
-            },
-            "publish_string" => {
-              *string = format!("{}", value).to_string();
-              pr_info!(logger, "updated parameters[ name:{key} value:{string} ]");
-            },
-            _ => println!("not parameter[ name:{key} ]"),
-        }
-      }
-    }),
-  );
-
   loop {
-    selector.wait()?;
+    let updated = param_server.wait().await?;
+
+    let params = param_server.params.read(); // Read lock
+    
+    let mut string = param_server_publish_string.lock().unwrap();
+    let mut hz = param_server_publish_hz.lock().unwrap();
+    for key in updated.iter() {
+      let value = &params.get_parameter(key).unwrap().value;
+      match &key[..] {
+          "publish_hz" => {
+            *hz = format!("{}", value).parse::<f64>().unwrap();
+            pr_info!(logger, "updated parameters[ name:{key} value:{hz}[Hz] ]");
+          },
+          "publish_string" => {
+            *string = format!("{}", value).to_string();
+            pr_info!(logger, "updated parameters[ name:{key} value:{string} ]");
+          },
+          _ => println!("not parameter[ name:{key} ]"),
+      }
+    }
   }
 
   _task1.await;
