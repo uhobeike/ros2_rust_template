@@ -95,8 +95,11 @@ ros2 launch launcher  multi_thread_pubsub.launch.py
 ros2 launch launcher  parameter_multi_thread_pubsub.launch.py 
 ```
 
-## [Rust code format]()
-
+## [Rust code format](https://doc.rust-jp.rs/book-ja/appendix-04-useful-development-tools.html)
+```
+rustup component add rustfmt
+cargo fmt
+```
 
 ## Reference
 
