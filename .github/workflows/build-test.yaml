@@ -30,7 +30,7 @@ jobs:
           sudo apt update -y
 
       - name : ROS 2 Rust install 
-        run: ./src/ros2_rust_install_script.sh
+        run: ./ros2_rust_install_script.sh
 
       - name: Build Test
         run: |
