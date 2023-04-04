@@ -93,14 +93,39 @@ async fn main() -> Result<(), DynError> {
         *hz = format!("{}", value).parse::<f64>().unwrap();
   });
 
+  async_std::task::block_on(get_param);
+
+  let logger = Logger::new("parameter_multi_thread_pub");
+  let param_server_publish_string = Arc::clone(&publish_string);
+  let param_server_publish_hz = Arc::clone(&publish_hz);
+  let param = Arc::clone(&param_server);
+  loop {
+    let mut param_server = param.lock().unwrap();
+
+    let updated = param_server.wait().await?;
+
+    let params = param_server.params.read();
+    
+    let mut string = param_server_publish_string.lock().unwrap();
+    let mut hz = param_server_publish_hz.lock().unwrap();
+    for key in updated.iter() {
+      let value = &params.get_parameter(key).unwrap().value;
+      match &key[..] {
+          "publish_hz" => {
+            *hz = format!("{}", value).parse::<f64>().unwrap();
+            pr_info!(logger, "updated parameters[ name:{key} value:{hz}[Hz] ]");
+          },
+          "publish_string" => {
+            *string = format!("{}", value).to_string();
+            pr_info!(logger, "updated parameters[ name:{key} value:{string} ]");
+          },
+          _ => println!("not parameter[ name:{key} ]"),
+      }
+    }
+  }
 
   _task1.await;
   _task2.await;
-  get_param.await;
 
   Ok(())
-
-    // loop {
-    //   async_std::task::sleep(Duration::from_millis(1000)).await;
-    // }
 }
