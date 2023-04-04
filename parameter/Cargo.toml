@@ -1,0 +1,2 @@
+[workspace]
+members = ["parameter_multi_thread_pub", "parameter_multi_thread_sub"]
