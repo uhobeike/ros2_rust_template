@@ -28,7 +28,13 @@ jobs:
       - name: Apt update
         run: |
           sudo apt update -y
-      
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
+      - name : ROS 2 Rust install 
+        run: ./src/ros2_rust_install_script.sh
+
       - name: Build Test
         run: |
           mkdir ../catkin_ws/src -p
@@ -37,6 +43,5 @@ jobs:
           rosdep update
           rosdep install -r -y --from-paths --ignore-src ./
           source /opt/ros/humble/setup.bash
-          ./src/ros2_rust_install_script.sh
           colcon  build --symlink-install
         shell: bash
