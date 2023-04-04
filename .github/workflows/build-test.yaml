@@ -37,6 +37,7 @@ jobs:
           rosdep update
           rosdep install -r -y --from-paths --ignore-src ./
           source /opt/ros/humble/setup.bash
+          sudo apt install tree
           tree
           ./src/ros2_rust_template/ros2_rust_install_script.sh
           colcon  build --symlink-install
