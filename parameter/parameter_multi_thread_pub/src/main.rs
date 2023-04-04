@@ -2,6 +2,7 @@ use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::V
 use std::time::Duration;
 use std::sync::{Arc, Mutex};
 
+#[allow(unused_assignments)]
 #[allow(unreachable_code)]
 #[async_std::main]
 async fn main() -> Result<(), DynError> {
@@ -13,11 +14,11 @@ async fn main() -> Result<(), DynError> {
 
   let publish_string = Arc::new(Mutex::new(String::default()));
   let publish_hz = Arc::new(Mutex::new(1.0));
-  let mut param_server = Arc::new(Mutex::new(node.create_parameter_server()?));
+  let param_server = Arc::new(Mutex::new(node.create_parameter_server()?));
 
   let param = Arc::clone(&param_server);
   {
-    let mut param_server = param.lock().unwrap();
+    let param_server = param.lock().unwrap();
     let mut params = param_server.params.write();
 
     params.set_dynamically_typed_parameter(
@@ -79,7 +80,7 @@ async fn main() -> Result<(), DynError> {
   let param_server_publish_string = Arc::clone(&publish_string);
   let param_server_publish_hz = Arc::clone(&publish_hz);
   let get_param = async_std::task::spawn(async move {
-        let mut param_server = param.lock().unwrap();
+        let param_server = param.lock().unwrap();
 
         let params = param_server.params.read();
 
