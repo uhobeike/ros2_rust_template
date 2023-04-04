@@ -16,3 +16,5 @@ pip install git+https://github.com/colcon/colcon-ros-cargo.git
 git clone https://github.com/tier4/cargo-ament-build.git
 cd cargo-ament-build
 cargo install --path .
+cd ..
+rm cargo-ament-build -r
