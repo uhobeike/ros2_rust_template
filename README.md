@@ -62,8 +62,9 @@ ROS 2のRustパッケージのテンプレートです。（私のRust力が乏�
 
 17 directories, 36 files
 ```
-## ROS 2 Rust Install
+## ROS 2 Rust Install（ROS 2インストール済み前提）
 ```
+./ros2_rust_install_script.sh 
 ```
 
 ## Build / Install
@@ -78,14 +79,7 @@ source install/setup.bash
 
 ## Run
 
-### Pub Sub
-
-```
-
-
-```
-
-###  Pub Sub Using Launch
+###  Pub Sub
 ```
 ros2 run sub sub 
 ros2 run pub pub 
