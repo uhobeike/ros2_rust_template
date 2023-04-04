@@ -8,8 +8,8 @@ source $HOME/.cargo/env
 sudo apt update -y
 sudo apt install -y ros-humble-desktop python3-colcon-common-extensions
 
-pip install -y git+https://github.com/tier4/colcon-cargo.git
-pip install -y git+https://github.com/colcon/colcon-ros-cargo.git
+pip install git+https://github.com/tier4/colcon-cargo.git
+pip install git+https://github.com/colcon/colcon-ros-cargo.git
 
 . /opt/ros/humble/setup.bash
 
