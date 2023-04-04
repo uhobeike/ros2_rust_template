@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
+# SPDX-License-Identifier: Apache-2.0
+
 from launch import LaunchDescription
 from launch.actions import GroupAction
 from launch_ros.actions import Node
