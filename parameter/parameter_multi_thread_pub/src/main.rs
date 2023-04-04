@@ -11,8 +11,29 @@ async fn main() -> Result<(), DynError> {
   let publisher1 = node.create_publisher::<std_msgs::msg::String>("task_1", None)?;
   let publisher2 = node.create_publisher::<std_msgs::msg::String>("task_2", None)?;
 
-  let publish_string = Arc::new(Mutex::new("パラメータでここを書き換えれるよ".to_string()));
+  let publish_string = Arc::new(Mutex::new(String::default()));
   let publish_hz = Arc::new(Mutex::new(1.0));
+  let mut param_server = Arc::new(Mutex::new(node.create_parameter_server()?));
+
+  let param = Arc::clone(&param_server);
+  {
+    let mut param_server = param.lock().unwrap();
+    let mut params = param_server.params.write();
+
+    params.set_dynamically_typed_parameter(
+        "publish_string".to_string(),
+        Value::String("パラメータでここを書き換えれるよ".to_string()),
+        false,
+        Some("publish_string description".to_string()),
+    )?;
+
+    params.set_dynamically_typed_parameter(
+        "publish_hz".to_string(),
+        Value::F64(1.0),
+        false,
+        Some("publish_hz description".to_string()),
+    )?;
+  }
 
   let task1_publish_string = Arc::clone(&publish_string);
   let task1_publish_hz = Arc::clone(&publish_hz);
@@ -54,51 +75,32 @@ async fn main() -> Result<(), DynError> {
     }
   });
 
-  let mut param_server = node.create_parameter_server()?;
-  {
-    let mut params = param_server.params.write();
-
-    params.set_dynamically_typed_parameter(
-        "publish_string".to_string(),
-        Value::String("こんにちは！世界".to_string()),
-        false,
-        Some("publish_string description".to_string()),
-    )?;
-
-    params.set_dynamically_typed_parameter(
-        "publish_hz".to_string(),
-        Value::F64(1.0),
-        false,
-        Some("publish_hz description".to_string()),
-    )?;
-  }
-
-  let logger = Logger::new("parameter_multi_thread_pub");
+  let param = Arc::clone(&param_server);
   let param_server_publish_string = Arc::clone(&publish_string);
   let param_server_publish_hz = Arc::clone(&publish_hz);
-  loop {
-    let updated = param_server.wait().await?;
+  let get_param = async_std::task::spawn(async move {
+        let mut param_server = param.lock().unwrap();
 
-    let params = param_server.params.read(); // Read lock
-    
-    let mut string = param_server_publish_string.lock().unwrap();
-    let mut hz = param_server_publish_hz.lock().unwrap();
-    for key in updated.iter() {
-      let value = &params.get_parameter(key).unwrap().value;
-      match &key[..] {
-          "publish_hz" => {
-            *hz = format!("{}", value).parse::<f64>().unwrap();
-            pr_info!(logger, "updated parameters[ name:{key} value:{hz}[Hz] ]");
-          },
-          "publish_string" => {
-            *string = format!("{}", value).to_string();
-            pr_info!(logger, "updated parameters[ name:{key} value:{string} ]");
-          },
-          _ => println!("not parameter[ name:{key} ]"),
-      }
-    }
-  }
+        let params = param_server.params.read();
+
+        let mut string = param_server_publish_string.lock().unwrap();
+        let value = &params.get_parameter("publish_string").unwrap().value;
+        *string = format!("{}", value).to_string();
+        
+
+        let mut hz = param_server_publish_hz.lock().unwrap();
+        let value = &params.get_parameter("publish_hz").unwrap().value;
+        *hz = format!("{}", value).parse::<f64>().unwrap();
+  });
+
 
   _task1.await;
   _task2.await;
+  get_param.await;
+
+  Ok(())
+
+    // loop {
+    //   async_std::task::sleep(Duration::from_millis(1000)).await;
+    // }
 }
