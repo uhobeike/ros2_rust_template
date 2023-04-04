@@ -1,4 +1,4 @@
-# ros2_rust_template
+# ros2_rust_template [![build-test](https://github.com/uhobeike/ros2_rust_template/actions/workflows/build-test.yaml/badge.svg)](https://github.com/uhobeike/ros2_rust_template/actions/workflows/build-test.yaml)
 
 ## Overview
 ROS 2のRustパッケージのテンプレートです。（私のRust力が乏しいので参考程度にお願いします）
